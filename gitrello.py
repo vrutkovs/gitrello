@@ -80,8 +80,7 @@ async def sync(config):
 
         for card_name in cards_to_remove:
             print("Removing '{0}' card from '{1}' list".format(card_name, list_name))
-            pr = prs[card_name]
-            await remove_task(pr, trello_list)
+            await remove_task(card_name, trello_list)
 
         for card_name in cards_to_create:
             print("Adding '{0}' card to '{1}' list".format(card_name, list_name))
@@ -95,11 +94,11 @@ async def add_task(pr, trello_list):
     card = trello_list.add_card(title)
     card.attach(url=url)
 
-async def remove_task(pr, trello_list):
-    title = pr['title']
+async def remove_task(title, trello_list):
     for card in trello_list.list_cards():
         if card.name == title:
             card.delete()
+            return
 
 async def main(loop):
     config = await read_config()
