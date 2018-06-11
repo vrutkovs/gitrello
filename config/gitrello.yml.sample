@@ -6,6 +6,9 @@ trello_boardid: 1337Speak
 # Optional: github personal token to increase rate limits
 #github_token: bazbar
 
+# Optional: number of workers
+#workers: 4
+
 # Sample board lists
 lists:
   'To review': 'is:open is:pr archived:false updated:>=2018-01-01 review-requested:username'
