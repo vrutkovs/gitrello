@@ -106,7 +106,10 @@ async def main(loop):
 
     # Periodically sync PRs
     while True:
-        await sync(config)
+        try:
+            await sync(config)
+        except Exception as e:
+            print(str(e))
         await asyncio.sleep(config['syncTimeout'], loop=loop)
 
 loop = asyncio.get_event_loop()
