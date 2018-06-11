@@ -61,33 +61,47 @@ async def create_missing_lists(config):
         lst_id = trello_lists[lst]
         board.get_list(lst_id).close()
 
+async def prs_to_sync(config, list_name, trello_list):
+    gh = config['github']
+    search_query = config['lists'][list_name]
+
+    search_results = gh.search_issues(search_query)
+    prs = dict([x.as_dict()['title'], x.as_dict()] for x in search_results)
+    existing_card_names = [x.name for x in trello_list.list_cards()]
+    return prs, existing_card_names
+
+async def sync_list(config, list_name, trello_list):
+    prs, existing_card_names = await prs_to_sync(config, list_name, trello_list)
+
+    cards_to_remove = existing_card_names - prs.keys()
+    cards_to_create = prs.keys() - existing_card_names
+
+    print("Found {0} cards to remove and {1} cards to add in '{2}'".format(
+          len(cards_to_remove), len(cards_to_create), list_name))
+
+    for card_name in cards_to_remove:
+        print("Removing '{0}' card from '{1}' list".format(card_name, list_name))
+        await remove_task(card_name, trello_list)
+
+    for card_name in cards_to_create:
+        print("Adding '{0}' card to '{1}' list".format(card_name, list_name))
+        pr = prs[card_name]
+        await add_task(pr, trello_list)
+
+async def get_lists(config, trello_lists):
+    for list_name in config['lists']:
+        trello_list = [x for x in trello_lists if x.name == list_name][0]
+        yield list_name, trello_list
+
 async def sync(config):
     print("Syncing PRs")
     gh = config['github']
     board = config['board']
-    for list_name in config['lists']:
-        search_query = config['lists'][list_name]
-        trello_list = [x for x in board.list_lists() if x.name == list_name][0]
-        search_results = gh.search_issues(search_query)
 
-        # Find out which cards should be removed
-        prs = dict([x.as_dict()['title'], x.as_dict()] for x in search_results)
-        existing_card_names = [x.name for x in trello_list.list_cards()]
+    trello_lists = board.list_lists()
 
-        cards_to_remove = existing_card_names - prs.keys()
-        cards_to_create = prs.keys() - existing_card_names
-
-        print("Found {0} cards to remove and {1} cards to add in '{2}'".format(
-              len(cards_to_remove), len(cards_to_create), list_name))
-
-        for card_name in cards_to_remove:
-            print("Removing '{0}' card from '{1}' list".format(card_name, list_name))
-            await remove_task(card_name, trello_list)
-
-        for card_name in cards_to_create:
-            print("Adding '{0}' card to '{1}' list".format(card_name, list_name))
-            pr = prs[card_name]
-            await add_task(pr, trello_list)
+    async for list_name, trello_list in get_lists(config, trello_lists):
+        await sync_list(config, list_name, trello_list)
 
 async def add_task(pr, trello_list):
     url = pr['html_url']
