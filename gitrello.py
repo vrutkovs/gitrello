@@ -53,11 +53,11 @@ async def create_missing_lists(config):
     lists_to_remove = existing_list_names - required_list_names
 
     for lst in lists_to_add:
-        print("Adding list {}".format(lst))
+        print(f"Adding list {lst}")
         board.add_list(lst)
 
     for lst in lists_to_remove:
-        print("Closing list {}".format(lst))
+        print(f"Closing list {lst}")
         lst_id = trello_lists[lst]
         board.get_list(lst_id).close()
 
@@ -80,11 +80,11 @@ async def sync_list(config, list_name, trello_list):
           len(cards_to_remove), len(cards_to_create), list_name))
 
     for card_name in cards_to_remove:
-        print("Removing '{0}' card from '{1}' list".format(card_name, list_name))
+        print(f"Removing '{card_name}' card from '{list_name}' list")
         await remove_task(card_name, trello_list)
 
     for card_name in cards_to_create:
-        print("Adding '{0}' card to '{1}' list".format(card_name, list_name))
+        print(f"Adding '{card_name}' card to '{list_name}' list")
         pr = prs[card_name]
         await add_task(pr, trello_list)
 
