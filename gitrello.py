@@ -1,6 +1,7 @@
 import asyncio
 import os
 import yaml
+import concurrent.futures
 
 from trello import TrelloClient
 from github3 import GitHub
@@ -52,14 +53,24 @@ async def create_missing_lists(config):
     lists_to_add = required_list_names - existing_list_names
     lists_to_remove = existing_list_names - required_list_names
 
-    for lst in lists_to_add:
-        print(f"Adding list {lst}")
-        board.add_list(lst)
+    futures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        for lst in lists_to_add:
+            futures.append(loop.run_in_executor(executor, add_list, board, lst))
+        for lst in lists_to_remove:
+            futures.append(loop.run_in_executor(executor, close_list, board, trello_lists, lst))
 
-    for lst in lists_to_remove:
-        print(f"Closing list {lst}")
-        lst_id = trello_lists[lst]
-        board.get_list(lst_id).close()
+    await asyncio.gather(*futures)
+
+def add_list(board, lst):
+    print(f"Adding list {lst}")
+    board.add_list(lst)
+
+def close_list(board, trello_lists, lst):
+    print(f"Closing list {lst}")
+    lst_id = trello_lists[lst]
+    trello_list = board.get_list(lst_id)
+    trello_list.close()
 
 async def prs_to_sync(config, list_name, trello_list):
     gh = config['github']
