@@ -9,6 +9,7 @@ python_version = '3.6'
 [packages]
 py-trello = '*'
 'github3.py' = '*'
+pyyaml = '*'
 
 [dev-packages]
 pytest = '*'

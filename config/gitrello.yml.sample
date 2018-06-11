@@ -1,0 +1,20 @@
+# Trello settings
+trello_appkey: deadbeef
+trello_token: foobar
+trello_boardid: 1337Speak
+
+# Optional: github personal token to increase rate limits
+#github_token: bazbar
+
+# Sample board lists
+lists:
+  'To review': 'is:open is:pr archived:false updated:>=2018-01-01 review-requested:username'
+  'Assigned': 'is:open is:pr archived:false updated:>=2018-01-01 assignee:username'
+  'Waiting for review': 'is:open is:pr archived:false updated:>=2018-01-01 review:none author:username'
+  'Changes requested': 'is:open is:pr archived:false updated:>=2018-01-01 review:changes_requested author:username'
+  'Failed tests': 'is:open is:pr archived:false updated:>=2018-01-01 status:failure author:username'
+
+# Optional: set sync timeout (seconds)
+#sync_timeout: 120
+
+# Optio
