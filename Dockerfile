@@ -1,9 +1,9 @@
-FROM registry.fedoraproject.org/fedora-minimal:28
+FROM registry.fedoraproject.org/fedora:28
 
 # Updates and pipenv
-RUN microdnf update -y && \
-    microdnf -y install pipenv which make && \
-    microdnf clean all
+RUN dnf update -y && \
+    dnf -y install pipenv which make && \
+    dnf clean all
 
 # Set LANG for pipenv
 ENV LANG en_US.UTF-8
